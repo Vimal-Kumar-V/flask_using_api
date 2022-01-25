@@ -8,18 +8,6 @@ mongo=MongoClient(host="localhost",port=27017)
 
 
 db=mongo.api_tasks
-def dictify(query):
-    ans={}
-    query = str(query)
-    query = query[2:-1]
-
-    query = query.split("&")
-    for q in query:
-        q = q.split("=")
-        q[0]=q[0].strip()
-        q[1]=q[1].strip()
-        ans[q[0]] = q[1]
-    return ans
 
 @app.route("/",methods=["POST","GET"])
 def home():
@@ -41,7 +29,7 @@ def home():
 def update(id):
     if request.method=="POST":
         update_id=ObjectId(id)
-        updated_string=dictify(request.query_string)
+        updated_string=(request.args)
         db.api_tasks.update({"_id":update_id},{"$set":updated_string})
         return "success"
 @app.route('/delete/<id>',methods=['POST'])
@@ -52,7 +40,7 @@ def delete(id):
 @app.route('/search',methods=['POST','GET'])
 def search():
     if request.method=="POST":
-        string_search=dict(dictify(request.query_string))
+        string_search=request.args
 
         result=list(db.api_tasks.find(string_search,{"_id":0}))
         return str(result)
